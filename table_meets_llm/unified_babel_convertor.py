@@ -90,7 +90,7 @@ class BabelConvertor:
         #             self.dataset.append(data)
         #     else:
         #         self.dataset = load_dataset(huggingface_hub, ignore_verifications=True)
-        self.dataset = load_dataset(f"./scripts/dataset_collection/{task}.py")
+        self.dataset = load_dataset(f"./dataset_collection/{task}.py")
         self.flag = 0  # no heuristics generation (zero-shot)
         self.request = get_requests(self.task)
         self.end_prompt = "The answer is \n"

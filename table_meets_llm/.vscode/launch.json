@@ -10,6 +10,7 @@
             "request": "launch",
             "program": "unified_benchmark_generator.py",
             "console": "integratedTerminal",
+            "justMyCode": false,
             "args": [
                 "--dataset", "tabfact", "feverous", "sqa", "hybridqa", "totto",
                 "--objective", "zero-shot",
@@ -19,6 +20,6 @@
                 "--use_format_explanation",
                 "--use_role_prompting"
             ]
-        }
+        },
     ]
 }

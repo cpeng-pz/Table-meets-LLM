@@ -69,7 +69,7 @@ class BabelBenchmarkGenerator:
 
     def fit_heuristics_constraints(self, sequence):
         tokenized_sequence = self.tokenizer(sequence).input_ids
-        if len(tokenized_sequence) < 3500:  # the max seq_length of GPT-3
+        if len(tokenized_sequence) < 16385:  # the max seq_length of gpt-3.5-turbo-0125
             return True
         else:
             return False
@@ -162,11 +162,24 @@ class TableDataRetrievalGenerator(DataRetrievalGenerator):
         self.random_samples = 300
 
         self.structured_type = "table"
-        self.instruction = f"You are a brilliant {self.structured_type} executor with the capabilities of {self.structured_type} partation, {self.structured_type} parsing, {self.structured_type} table search/retrieval, and table operation/manipulation. You can solve any tasks related to {self.structured_type}.\n"
+        self.instruction = f"You are a brilliant {self.structured_type} executor with the capabilities of {self.structured_type} partition, {self.structured_type} parsing, {self.structured_type} search/retrieval, and {self.structured_type} operation/manipulation. You can solve any tasks related to {self.structured_type}.\n"
         self.end_prompt = "The answer is "
         for objective in self.objective:  # ["zero-shot", "1-shot", "few-shot"]
             for table_dataset in self.table_datasets_list:  # ["tabfact", "sqa", "hybridqa", "feverous", "totto"]
-                self.babel_convertor.set_split_obj(table_dataset, self.structured_type, self.split, objective, self.instruction)
+                # self.babel_convertor.set_split_obj(table_dataset, self.structured_type, self.split, objective, self.instruction)
+
+                self.babel_convertor.set_split_obj(
+                    task = table_dataset,
+                    structured_type = self.structured_type,
+                    split = self.split,
+                    objective = objective,
+                    instruction = self.instruction,
+                    linearize_func = self.linearize_list[0], # TODO 这里应该怎么改？
+                    use_partition_mark = self.use_partition_mark,
+                    use_format_explanation = self.use_format_explanation,
+                    heuristic = None, # TODO 参考get_heuristics方法（论文和sh文件中好像没出现heuristic？）
+                )
+
                 self.dataset = self.babel_convertor.dataset
                 self.dataset_name = table_dataset
                 self.specific_objective = objective
@@ -246,7 +259,16 @@ class TableDataRetrievalGenerator(DataRetrievalGenerator):
                 }
             }
             try:
-                schema_knowledge = self.linearize.retrieve_linear_function(self.linearize_function, self.use_partition_mark, self.use_format_explanation, self.change_order, self.swap_input_order, structured_data_dict)
+                # schema_knowledge = self.linearize.retrieve_linear_function(self.linearize_function, self.use_partition_mark, self.use_format_explanation, self.change_order, self.swap_input_order, structured_data_dict)
+
+                schema_knowledge = self.linearize.retrieve_linear_function(
+                    func = self.linearize_function, 
+                    use_structure_mark = self.use_partition_mark, 
+                    add_grammar = self.use_format_explanation, 
+                    change_order = self.change_order, 
+                    structured_data_dict = structured_data_dict
+                    )
+
             except:
                 continue
             if self.specific_objective == "1-shot":
